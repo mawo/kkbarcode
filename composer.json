@@ -1,0 +1,17 @@
+{
+    "name": "mawo/kkbarcode",
+    "type": "library",
+    "description": "Generate barcodes from a single PHP file.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Manuel Wohlers",
+            "email": "code@skanto.de",
+            "homepage": "https://www.skanto.de",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "classmap": ["barcode.php"]
+    }
+}
