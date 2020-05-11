@@ -133,7 +133,7 @@ class barcode_generator {
 
 	/* - - - - INTERNAL FUNCTIONS - - - - */
 
-	private function encode_and_calculate_size($symbology, $data, $options) {
+	protected function encode_and_calculate_size($symbology, $data, $options) {
 		$code = $this->dispatch_encode($symbology, $data, $options);
 		$widths = array(
 			(isset($options['wq']) ? (int)$options['wq'] : 1),
@@ -172,7 +172,7 @@ class barcode_generator {
 		);
 	}
 
-	private function allocate_color($image, $color) {
+	protected function allocate_color($image, $color) {
 		$color = preg_replace('/[^0-9A-Fa-f]/', '', $color);
 		switch (strlen($color)) {
 			case 1:
@@ -212,7 +212,7 @@ class barcode_generator {
 
 	/* - - - - DISPATCH - - - - */
 
-	private function dispatch_encode($symbology, $data, $options) {
+	protected function dispatch_encode($symbology, $data, $options) {
 		switch (strtolower(preg_replace('/[^A-Za-z0-9]/', '', $symbology))) {
 			case 'upca'       : return $this->upc_a_encode($data);
 			case 'upce'       : return $this->upc_e_encode($data);
@@ -254,7 +254,7 @@ class barcode_generator {
 		return null;
 	}
 
-	private function dispatch_calculate_size($code, $widths, $options) {
+	protected function dispatch_calculate_size($code, $widths, $options) {
 		if ($code && isset($code['g']) && $code['g']) {
 			switch ($code['g']) {
 				case 'l':
@@ -266,7 +266,7 @@ class barcode_generator {
 		return array(0, 0);
 	}
 
-	private function dispatch_render_image(
+	protected function dispatch_render_image(
 		$image, $code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		if ($code && isset($code['g']) && $code['g']) {
@@ -287,7 +287,7 @@ class barcode_generator {
 		}
 	}
 
-	private function dispatch_render_svg(
+	protected function dispatch_render_svg(
 		$code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		if ($code && isset($code['g']) && $code['g']) {
@@ -309,7 +309,7 @@ class barcode_generator {
 
 	/* - - - - LINEAR BARCODE RENDERER - - - - */
 
-	private function linear_calculate_size($code, $widths) {
+	protected function linear_calculate_size($code, $widths) {
 		$width = 0;
 		foreach ($code['b'] as $block) {
 			foreach ($block['m'] as $module) {
@@ -319,7 +319,7 @@ class barcode_generator {
 		return array($width, 80);
 	}
 
-	private function linear_render_image(
+	protected function linear_render_image(
 		$image, $code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		$textheight = (isset($options['th']) ? (int)$options['th'] : 10);
@@ -369,7 +369,7 @@ class barcode_generator {
 		}
 	}
 
-	private function linear_render_svg(
+	protected function linear_render_svg(
 		$code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		$textheight = (isset($options['th']) ? (int)$options['th'] : 10);
@@ -440,7 +440,7 @@ class barcode_generator {
 
 	/* - - - - MATRIX BARCODE RENDERER - - - - */
 
-	private function matrix_calculate_size($code, $widths) {
+	protected function matrix_calculate_size($code, $widths) {
 		$width = (
 			$code['q'][3] * $widths[0] +
 			$code['s'][0] * $widths[1] +
@@ -454,7 +454,7 @@ class barcode_generator {
 		return array($width, $height);
 	}
 
-	private function matrix_render_image(
+	protected function matrix_render_image(
 		$image, $code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		$shape = (isset($options['ms']) ? strtolower($options['ms']) : '');
@@ -485,7 +485,7 @@ class barcode_generator {
 		}
 	}
 
-	private function matrix_render_svg(
+	protected function matrix_render_svg(
 		$code, $x, $y, $w, $h, $colors, $widths, $options
 	) {
 		$shape = (isset($options['ms']) ? strtolower($options['ms']) : '');
@@ -522,7 +522,7 @@ class barcode_generator {
 		return $svg . '</g>';
 	}
 
-	private function matrix_dot_image($image, $x, $y, $w, $h, $mc, $ms, $md) {
+	protected function matrix_dot_image($image, $x, $y, $w, $h, $mc, $ms, $md) {
 		switch ($ms) {
 			default:
 				$x = floor($x + (1 - $md) * $w / 2);
@@ -549,7 +549,7 @@ class barcode_generator {
 		}
 	}
 
-	private function matrix_dot_svg($x, $y, $w, $h, $mc, $ms, $md) {
+	protected function matrix_dot_svg($x, $y, $w, $h, $mc, $ms, $md) {
 		switch ($ms) {
 			default:
 				$x += (1 - $md) * $w / 2;
@@ -588,7 +588,7 @@ class barcode_generator {
 
 	/* - - - - UPC FAMILY ENCODER - - - - */
 
-	private function upc_a_encode($data) {
+	protected function upc_a_encode($data) {
 		$data = $this->upc_a_normalize($data);
 		$blocks = array();
 		/* Quiet zone, start, first digit. */
@@ -673,7 +673,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function upc_e_encode($data) {
+	protected function upc_e_encode($data) {
 		$data = $this->upc_e_normalize($data);
 		$blocks = array();
 		/* Quiet zone, start. */
@@ -722,7 +722,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function ean_13_encode($data, $pad) {
+	protected function ean_13_encode($data, $pad) {
 		$data = $this->ean_13_normalize($data);
 		$blocks = array();
 		/* Quiet zone, start, first digit (as parity). */
@@ -796,7 +796,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function ean_8_encode($data) {
+	protected function ean_8_encode($data) {
 		$data = $this->ean_8_normalize($data);
 		$blocks = array();
 		/* Quiet zone, start. */
@@ -863,7 +863,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function upc_a_normalize($data) {
+	protected function upc_a_normalize($data) {
 		$data = preg_replace('/[^0-9*]/', '', $data);
 		/* Set length to 12 digits. */
 		if (strlen($data) < 5) {
@@ -906,7 +906,7 @@ class barcode_generator {
 		return $data;
 	}
 
-	private function upc_e_normalize($data) {
+	protected function upc_e_normalize($data) {
 		$data = preg_replace('/[^0-9*]/', '', $data);
 		/* If exactly 8 digits, use verbatim even if check digit is wrong. */
 		if (preg_match(
@@ -952,7 +952,7 @@ class barcode_generator {
 		return str_repeat('0', 8);
 	}
 
-	private function ean_13_normalize($data) {
+	protected function ean_13_normalize($data) {
 		$data = preg_replace('/[^0-9*]/', '', $data);
 		/* Set length to 13 digits. */
 		if (strlen($data) < 13) {
@@ -978,7 +978,7 @@ class barcode_generator {
 		return $data;
 	}
 
-	private function ean_8_normalize($data) {
+	protected function ean_8_normalize($data) {
 		$data = preg_replace('/[^0-9*]/', '', $data);
 		/* Set length to 8 digits. */
 		if (strlen($data) < 8) {
@@ -1008,7 +1008,7 @@ class barcode_generator {
 		return $data;
 	}
 
-	private $upc_alphabet = array(
+	protected $upc_alphabet = array(
 		'0' => array(3, 2, 1, 1),
 		'1' => array(2, 2, 2, 1),
 		'2' => array(2, 1, 2, 2),
@@ -1021,7 +1021,7 @@ class barcode_generator {
 		'9' => array(3, 1, 1, 2),
 	);
 
-	private $upc_parity = array(
+	protected $upc_parity = array(
 		'0' => array(1, 1, 1, 0, 0, 0),
 		'1' => array(1, 1, 0, 1, 0, 0),
 		'2' => array(1, 1, 0, 0, 1, 0),
@@ -1036,7 +1036,7 @@ class barcode_generator {
 
 	/* - - - - CODE 39 FAMILY ENCODER - - - - */
 
-	private function code_39_encode($data) {
+	protected function code_39_encode($data) {
 		$data = strtoupper(preg_replace('/[^0-9A-Za-z%$\/+ .-]/', '', $data));
 		$blocks = array();
 		/* Start */
@@ -1086,7 +1086,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function code_39_ascii_encode($data) {
+	protected function code_39_ascii_encode($data) {
 		$modules = array();
 		/* Start */
 		$modules[] = array(1, 1, 1);
@@ -1142,7 +1142,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function code_93_encode($data) {
+	protected function code_93_encode($data) {
 		$data = strtoupper(preg_replace('/[^0-9A-Za-z%+\/$ .-]/', '', $data));
 		$modules = array();
 		/* Start */
@@ -1202,7 +1202,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function code_93_ascii_encode($data) {
+	protected function code_93_ascii_encode($data) {
 		$modules = array();
 		/* Start */
 		$modules[] = array(1, 1, 1);
@@ -1274,7 +1274,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private $code_39_alphabet = array(
+	protected $code_39_alphabet = array(
 		'1' => array(2, 1, 1, 2, 1, 1, 1, 1, 2),
 		'2' => array(1, 1, 2, 2, 1, 1, 1, 1, 2),
 		'3' => array(2, 1, 2, 2, 1, 1, 1, 1, 1),
@@ -1321,7 +1321,7 @@ class barcode_generator {
 		'%' => array(1, 1, 1, 2, 1, 2, 1, 2, 1),
 	);
 
-	private $code_39_asciibet = array(
+	protected $code_39_asciibet = array(
 		'%U', '$A', '$B', '$C', '$D', '$E', '$F', '$G',
 		'$H', '$I', '$J', '$K', '$L', '$M', '$N', '$O',
 		'$P', '$Q', '$R', '$S', '$T', '$U', '$V', '$W',
@@ -1340,7 +1340,7 @@ class barcode_generator {
 		'+X', '+Y', '+Z', '%P', '%Q', '%R', '%S', '%T',
 	);
 
-	private $code_93_alphabet = array(
+	protected $code_93_alphabet = array(
 		'0' => array(1, 3, 1, 1, 1, 2,  0),
 		'1' => array(1, 1, 1, 2, 1, 3,  1),
 		'2' => array(1, 1, 1, 3, 1, 2,  2),
@@ -1391,7 +1391,7 @@ class barcode_generator {
 		'*' => array(1, 1, 1, 1, 4, 1,  0),
 	);
 
-	private $code_93_asciibet = array(
+	protected $code_93_asciibet = array(
 		'&U', '#A', '#B', '#C', '#D', '#E', '#F', '#G',
 		'#H', '#I', '#J', '#K', '#L', '#M', '#N', '#O',
 		'#P', '#Q', '#R', '#S', '#T', '#U', '#V', '#W',
@@ -1412,7 +1412,7 @@ class barcode_generator {
 
 	/* - - - - CODE 128 ENCODER - - - - */
 
-	private function code_128_encode($data, $dstate, $fnc1) {
+	protected function code_128_encode($data, $dstate, $fnc1) {
 		$data = preg_replace('/[\x80-\xFF]/', '', $data);
 		$label = preg_replace('/[\x00-\x1F\x7F]/', ' ', $data);
 		$chars = $this->code_128_normalize($data, $dstate, $fnc1);
@@ -1436,7 +1436,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private function code_128_normalize($data, $dstate, $fnc1) {
+	protected function code_128_normalize($data, $dstate, $fnc1) {
 		$detectcba = '/(^[0-9]{4,}|^[0-9]{2}$)|([\x60-\x7F])|([\x00-\x1F])/';
 		$detectc = '/(^[0-9]{6,}|^[0-9]{4,}$)/';
 		$detectba = '/([\x60-\x7F])|([\x00-\x1F])/';
@@ -1542,7 +1542,7 @@ class barcode_generator {
 		return $chars;
 	}
 
-	private $code_128_alphabet = array(
+	protected $code_128_alphabet = array(
 		array(2, 1, 2, 2, 2, 2), array(2, 2, 2, 1, 2, 2),
 		array(2, 2, 2, 2, 2, 1), array(1, 2, 1, 2, 2, 3),
 		array(1, 2, 1, 3, 2, 2), array(1, 3, 1, 2, 2, 2),
@@ -1601,7 +1601,7 @@ class barcode_generator {
 
 	/* - - - - CODABAR ENCODER - - - - */
 
-	private function codabar_encode($data) {
+	protected function codabar_encode($data) {
 		$data = strtoupper(preg_replace(
 			'/[^0-9ABCDENTabcdent*.\/:+$-]/', '', $data
 		));
@@ -1630,7 +1630,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private $codabar_alphabet = array(
+	protected $codabar_alphabet = array(
 		'0' => array(1, 1, 1, 1, 1, 2, 2),
 		'1' => array(1, 1, 1, 1, 2, 2, 1),
 		'4' => array(1, 1, 2, 1, 1, 2, 1),
@@ -1659,7 +1659,7 @@ class barcode_generator {
 
 	/* - - - - ITF ENCODER - - - - */
 
-	private function itf_encode($data) {
+	protected function itf_encode($data) {
 		$data = preg_replace('/[^0-9]/', '', $data);
 		if (strlen($data) % 2) $data = '0' . $data;
 		$blocks = array();
@@ -1712,7 +1712,7 @@ class barcode_generator {
 		return array('g' => 'l', 'b' => $blocks);
 	}
 
-	private $itf_alphabet = array(
+	protected $itf_alphabet = array(
 		'0' => array(1, 1, 2, 2, 1),
 		'1' => array(2, 1, 1, 1, 2),
 		'2' => array(1, 2, 1, 1, 2),
@@ -1727,7 +1727,7 @@ class barcode_generator {
 
 	/* - - - - QR ENCODER - - - - */
 
-	private function qr_encode($data, $ecl) {
+	protected function qr_encode($data, $ecl) {
 		list($mode, $vers, $ec, $data) = $this->qr_encode_data($data, $ecl);
 		$data = $this->qr_encode_ec($data, $ec, $vers);
 		list($size, $mtx) = $this->qr_create_matrix($vers, $data);
@@ -1741,7 +1741,7 @@ class barcode_generator {
 		);
 	}
 
-	private function qr_encode_data($data, $ecl) {
+	protected function qr_encode_data($data, $ecl) {
 		$mode = $this->qr_detect_mode($data);
 		$version = $this->qr_detect_version($data, $mode, $ecl);
 		$version_group = (($version < 10) ? 0 : (($version < 27) ? 1 : 2));
@@ -1791,7 +1791,7 @@ class barcode_generator {
 		return array($mode, $version, $ec_params, $data);
 	}
 
-	private function qr_detect_mode($data) {
+	protected function qr_detect_mode($data) {
 		$numeric = '/^[0-9]*$/';
 		$alphanumeric = '/^[0-9A-Z .\/:$%*+-]*$/';
 		$kanji = '/^([\x81-\x9F\xE0-\xEA][\x40-\xFC]|[\xEB][\x40-\xBF])*$/';
@@ -1801,7 +1801,7 @@ class barcode_generator {
 		return 2;
 	}
 
-	private function qr_detect_version($data, $mode, $ecl) {
+	protected function qr_detect_version($data, $mode, $ecl) {
 		$length = strlen($data);
 		if ($mode == 3) $length >>= 1;
 		for ($v = 0; $v < 40; $v++) {
@@ -1812,7 +1812,7 @@ class barcode_generator {
 		return 40;
 	}
 
-	private function qr_encode_numeric($data, $version_group) {
+	protected function qr_encode_numeric($data, $version_group) {
 		$code = array(0, 0, 0, 1);
 		$length = strlen($data);
 		switch ($version_group) {
@@ -1855,7 +1855,7 @@ class barcode_generator {
 		return $code;
 	}
 
-	private function qr_encode_alphanumeric($data, $version_group) {
+	protected function qr_encode_alphanumeric($data, $version_group) {
 		$alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
 		$code = array(0, 0, 1, 0);
 		$length = strlen($data);
@@ -1907,7 +1907,7 @@ class barcode_generator {
 		return $code;
 	}
 
-	private function qr_encode_binary($data, $version_group) {
+	protected function qr_encode_binary($data, $version_group) {
 		$code = array(0, 1, 0, 0);
 		$length = strlen($data);
 		switch ($version_group) {
@@ -1945,7 +1945,7 @@ class barcode_generator {
 		return $code;
 	}
 
-	private function qr_encode_kanji($data, $version_group) {
+	protected function qr_encode_kanji($data, $version_group) {
 		$code = array(1, 0, 0, 0);
 		$length = strlen($data);
 		switch ($version_group) {
@@ -1996,7 +1996,7 @@ class barcode_generator {
 		return $code;
 	}
 
-	private function qr_encode_ec($data, $ec_params, $version) {
+	protected function qr_encode_ec($data, $ec_params, $version) {
 		$blocks = $this->qr_ec_split($data, $ec_params);
 		$ec_blocks = array();
 		for ($i = 0, $n = count($blocks); $i < $n; $i++) {
@@ -2031,7 +2031,7 @@ class barcode_generator {
 		return $code;
 	}
 
-	private function qr_ec_split($data, $ec_params) {
+	protected function qr_ec_split($data, $ec_params) {
 		$blocks = array();
 		$offset = 0;
 		for ($i = $ec_params[2], $length = $ec_params[3]; $i > 0; $i--) {
@@ -2045,7 +2045,7 @@ class barcode_generator {
 		return $blocks;
 	}
 
-	private function qr_ec_divide($data, $ec_params) {
+	protected function qr_ec_divide($data, $ec_params) {
 		$num_data = count($data);
 		$num_error = $ec_params[1];
 		$generator = $this->qr_ec_polynomials[$num_error];
@@ -2065,7 +2065,7 @@ class barcode_generator {
 		return array_slice($message, $num_data, $num_error);
 	}
 
-	private function qr_ec_interleave($blocks) {
+	protected function qr_ec_interleave($blocks) {
 		$data = array();
 		$num_blocks = count($blocks);
 		for ($offset = 0; true; $offset++) {
@@ -2081,7 +2081,7 @@ class barcode_generator {
 		return $data;
 	}
 
-	private function qr_create_matrix($version, $data) {
+	protected function qr_create_matrix($version, $data) {
 		$size = $version * 4 + 17;
 		$matrix = array();
 		for ($i = 0; $i < $size; $i++) {
@@ -2167,7 +2167,7 @@ class barcode_generator {
 		return array($size, $matrix);
 	}
 
-	private function qr_apply_best_mask($matrix, $size) {
+	protected function qr_apply_best_mask($matrix, $size) {
 		$best_mask = 0;
 		$best_matrix = $this->qr_apply_mask($matrix, $size, $best_mask);
 		$best_penalty = $this->qr_penalty($best_matrix, $size);
@@ -2183,7 +2183,7 @@ class barcode_generator {
 		return array($best_mask, $best_matrix);
 	}
 
-	private function qr_apply_mask($matrix, $size, $mask) {
+	protected function qr_apply_mask($matrix, $size, $mask) {
 		for ($i = 0; $i < $size; $i++) {
 			for ($j = 0; $j < $size; $j++) {
 				if ($matrix[$i][$j] >= 4) {
@@ -2196,7 +2196,7 @@ class barcode_generator {
 		return $matrix;
 	}
 
-	private function qr_mask($mask, $r, $c) {
+	protected function qr_mask($mask, $r, $c) {
 		switch ($mask) {
 			case 0: return !( ($r + $c) % 2 );
 			case 1: return !( ($r     ) % 2 );
@@ -2209,7 +2209,7 @@ class barcode_generator {
 		}
 	}
 
-	private function qr_penalty(&$matrix, $size) {
+	protected function qr_penalty(&$matrix, $size) {
 		$score  = $this->qr_penalty_1($matrix, $size);
 		$score += $this->qr_penalty_2($matrix, $size);
 		$score += $this->qr_penalty_3($matrix, $size);
@@ -2217,7 +2217,7 @@ class barcode_generator {
 		return $score;
 	}
 
-	private function qr_penalty_1(&$matrix, $size) {
+	protected function qr_penalty_1(&$matrix, $size) {
 		$score = 0;
 		for ($i = 0; $i < $size; $i++) {
 			$rowvalue = 0;
@@ -2248,7 +2248,7 @@ class barcode_generator {
 		return $score;
 	}
 
-	private function qr_penalty_2(&$matrix, $size) {
+	protected function qr_penalty_2(&$matrix, $size) {
 		$score = 0;
 		for ($i = 1; $i < $size; $i++) {
 			for ($j = 1; $j < $size; $j++) {
@@ -2266,7 +2266,7 @@ class barcode_generator {
 		return $score;
 	}
 
-	private function qr_penalty_3(&$matrix, $size) {
+	protected function qr_penalty_3(&$matrix, $size) {
 		$score = 0;
 		for ($i = 0; $i < $size; $i++) {
 			$rowvalue = 0;
@@ -2291,7 +2291,7 @@ class barcode_generator {
 		return $score;
 	}
 
-	private function qr_penalty_4(&$matrix, $size) {
+	protected function qr_penalty_4(&$matrix, $size) {
 		$dark = 0;
 		for ($i = 0; $i < $size; $i++) {
 			for ($j = 0; $j < $size; $j++) {
@@ -2307,7 +2307,7 @@ class barcode_generator {
 		return min($a, $b) * 10;
 	}
 
-	private function qr_finalize_matrix(
+	protected function qr_finalize_matrix(
 		$matrix, $size, $ecl, $mask, $version
 	) {
 		/* Format Info */
@@ -2364,7 +2364,7 @@ class barcode_generator {
 	/*  maximum encodable characters = $qr_capacity [ (version - 1) ]  */
 	/*    [ (0 for L, 1 for M, 2 for Q, 3 for H)                    ]  */
 	/*    [ (0 for numeric, 1 for alpha, 2 for binary, 3 for kanji) ]  */
-	private $qr_capacity = array(
+	protected $qr_capacity = array(
 		array(array(  41,   25,   17,   10), array(  34,   20,   14,    8),
 		      array(  27,   16,   11,    7), array(  17,   10,    7,    4)),
 		array(array(  77,   47,   32,   20), array(  63,   38,   26,   16),
@@ -2457,7 +2457,7 @@ class barcode_generator {
 	/*    number of blocks in second group,                         */
 	/*    number of data codewords per block in second group        */
 	/*  );                                                          */
-	private $qr_ec_params = array(
+	protected $qr_ec_params = array(
 		array(   19,  7,  1,  19,  0,   0 ),
 		array(   16, 10,  1,  16,  0,   0 ),
 		array(   13, 13,  1,  13,  0,   0 ),
@@ -2620,7 +2620,7 @@ class barcode_generator {
 		array( 1276, 30, 20,  15, 61,  16 ),
 	);
 
-	private $qr_ec_polynomials = array(
+	protected $qr_ec_polynomials = array(
 		7 => array(
 			0, 87, 229, 146, 149, 238, 102, 21
 		),
@@ -2676,7 +2676,7 @@ class barcode_generator {
 		),
 	);
 
-	private $qr_log = array(
+	protected $qr_log = array(
 		  0,   0,   1,  25,   2,  50,  26, 198,
 		  3, 223,  51, 238,  27, 104, 199,  75,
 		  4, 100, 224,  14,  52, 141, 239, 129,
@@ -2711,7 +2711,7 @@ class barcode_generator {
 		116, 214, 244, 234, 168,  80,  88, 175,
 	);
 
-	private $qr_exp = array(
+	protected $qr_exp = array(
 		  1,   2,   4,   8,  16,  32,  64, 128,
 		 29,  58, 116, 232, 205, 135,  19,  38,
 		 76, 152,  45,  90, 180, 117, 234, 201,
@@ -2746,12 +2746,12 @@ class barcode_generator {
 		 27,  54, 108, 216, 173,  71, 142,   1,
 	);
 
-	private $qr_remainder_bits = array(
+	protected $qr_remainder_bits = array(
 		0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3,
 		4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
 	);
 
-	private $qr_alignment_patterns = array(
+	protected $qr_alignment_patterns = array(
 		array(6, 18),
 		array(6, 22),
 		array(6, 26),
@@ -2796,7 +2796,7 @@ class barcode_generator {
 	/*  format info string = $qr_format_info[            */
 	/*    (0 for L, 8 for M, 16 for Q, 24 for H) + mask  */
 	/*  ];                                               */
-	private $qr_format_info = array(
+	protected $qr_format_info = array(
 		array( 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0 ),
 		array( 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1 ),
 		array( 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0 ),
@@ -2832,7 +2832,7 @@ class barcode_generator {
 	);
 
 	/*  version info string = $qr_version_info[ (version - 7) ]  */
-	private $qr_version_info = array(
+	protected $qr_version_info = array(
 		array( 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0 ),
 		array( 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0 ),
 		array( 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1 ),
@@ -2871,7 +2871,7 @@ class barcode_generator {
 
 	/* - - - - DATA MATRIX ENCODER - - - - */
 
-	private function dmtx_encode($data, $rect, $fnc1) {
+	protected function dmtx_encode($data, $rect, $fnc1) {
 		list($data, $ec) = $this->dmtx_encode_data($data, $rect, $fnc1);
 		$data = $this->dmtx_encode_ec($data, $ec);
 		list($h, $w, $mtx) = $this->dmtx_create_matrix($ec, $data);
@@ -2883,7 +2883,7 @@ class barcode_generator {
 		);
 	}
 
-	private function dmtx_encode_data($data, $rect, $fnc1) {
+	protected function dmtx_encode_data($data, $rect, $fnc1) {
 		/* Convert to data codewords. */
 		$edata = ($fnc1 ? array(232) : array());
 		$length = strlen($data);
@@ -2928,7 +2928,7 @@ class barcode_generator {
 		return array($edata, $ec_params);
 	}
 
-	private function dmtx_detect_version($length, $rect) {
+	protected function dmtx_detect_version($length, $rect) {
 		for ($i = ($rect ? 24 : 0), $j = ($rect ? 30 : 24); $i < $j; $i++) {
 			if ($length <= $this->dmtx_ec_params[$i][0]) {
 				return $this->dmtx_ec_params[$i];
@@ -2937,7 +2937,7 @@ class barcode_generator {
 		return $this->dmtx_ec_params[$j - 1];
 	}
 
-	private function dmtx_encode_ec($data, $ec_params) {
+	protected function dmtx_encode_ec($data, $ec_params) {
 		$blocks = $this->dmtx_ec_split($data, $ec_params);
 		for ($i = 0, $n = count($blocks); $i < $n; $i++) {
 			$ec_block = $this->dmtx_ec_divide($blocks[$i], $ec_params);
@@ -2946,7 +2946,7 @@ class barcode_generator {
 		return $this->dmtx_ec_interleave($blocks);
 	}
 
-	private function dmtx_ec_split($data, $ec_params) {
+	protected function dmtx_ec_split($data, $ec_params) {
 		$blocks = array();
 		$num_blocks = $ec_params[2] + $ec_params[4];
 		for ($i = 0; $i < $num_blocks; $i++) {
@@ -2958,7 +2958,7 @@ class barcode_generator {
 		return $blocks;
 	}
 
-	private function dmtx_ec_divide($data, $ec_params) {
+	protected function dmtx_ec_divide($data, $ec_params) {
 		$num_data = count($data);
 		$num_error = $ec_params[1];
 		$generator = $this->dmtx_ec_polynomials[$num_error];
@@ -2978,7 +2978,7 @@ class barcode_generator {
 		return array_slice($message, $num_data, $num_error);
 	}
 
-	private function dmtx_ec_interleave($blocks) {
+	protected function dmtx_ec_interleave($blocks) {
 		$data = array();
 		$num_blocks = count($blocks);
 		for ($offset = 0; true; $offset++) {
@@ -2994,7 +2994,7 @@ class barcode_generator {
 		return $data;
 	}
 
-	private function dmtx_create_matrix($ec_params, $data) {
+	protected function dmtx_create_matrix($ec_params, $data) {
 		/* Create matrix. */
 		$rheight = $ec_params[8] + 2;
 		$rwidth = $ec_params[9] + 2;
@@ -3044,7 +3044,7 @@ class barcode_generator {
 		return array($height, $width, $bitmap);
 	}
 
-	private function dmtx_place_data(&$mtx, $rows, $cols, $data) {
+	protected function dmtx_place_data(&$mtx, $rows, $cols, $data) {
 		$row = 4;
 		$col = 0;
 		$offset = 0;
@@ -3085,7 +3085,7 @@ class barcode_generator {
 		}
 	}
 
-	private function dmtx_place_1(&$matrix, $rows, $cols, $b) {
+	protected function dmtx_place_1(&$matrix, $rows, $cols, $b) {
 		$matrix[$rows - 1][0] = (($b & 0x80) ? 1 : 0);
 		$matrix[$rows - 1][1] = (($b & 0x40) ? 1 : 0);
 		$matrix[$rows - 1][2] = (($b & 0x20) ? 1 : 0);
@@ -3096,7 +3096,7 @@ class barcode_generator {
 		$matrix[3][$cols - 1] = (($b & 0x01) ? 1 : 0);
 	}
 
-	private function dmtx_place_2(&$matrix, $rows, $cols, $b) {
+	protected function dmtx_place_2(&$matrix, $rows, $cols, $b) {
 		$matrix[$rows - 3][0] = (($b & 0x80) ? 1 : 0);
 		$matrix[$rows - 2][0] = (($b & 0x40) ? 1 : 0);
 		$matrix[$rows - 1][0] = (($b & 0x20) ? 1 : 0);
@@ -3107,7 +3107,7 @@ class barcode_generator {
 		$matrix[1][$cols - 1] = (($b & 0x01) ? 1 : 0);
 	}
 
-	private function dmtx_place_3(&$matrix, $rows, $cols, $b) {
+	protected function dmtx_place_3(&$matrix, $rows, $cols, $b) {
 		$matrix[$rows - 3][0] = (($b & 0x80) ? 1 : 0);
 		$matrix[$rows - 2][0] = (($b & 0x40) ? 1 : 0);
 		$matrix[$rows - 1][0] = (($b & 0x20) ? 1 : 0);
@@ -3118,7 +3118,7 @@ class barcode_generator {
 		$matrix[3][$cols - 1] = (($b & 0x01) ? 1 : 0);
 	}
 
-	private function dmtx_place_4(&$matrix, $rows, $cols, $b) {
+	protected function dmtx_place_4(&$matrix, $rows, $cols, $b) {
 		$matrix[$rows - 1][        0] = (($b & 0x80) ? 1 : 0);
 		$matrix[$rows - 1][$cols - 1] = (($b & 0x40) ? 1 : 0);
 		$matrix[        0][$cols - 3] = (($b & 0x20) ? 1 : 0);
@@ -3129,7 +3129,7 @@ class barcode_generator {
 		$matrix[        1][$cols - 1] = (($b & 0x01) ? 1 : 0);
 	}
 
-	private function dmtx_place_0(&$matrix, $rows, $cols, $row, $col, $b) {
+	protected function dmtx_place_0(&$matrix, $rows, $cols, $row, $col, $b) {
 		$this->dmtx_place_b($matrix, $rows, $cols, $row-2, $col-2, $b & 0x80);
 		$this->dmtx_place_b($matrix, $rows, $cols, $row-2, $col-1, $b & 0x40);
 		$this->dmtx_place_b($matrix, $rows, $cols, $row-1, $col-2, $b & 0x20);
@@ -3140,7 +3140,7 @@ class barcode_generator {
 		$this->dmtx_place_b($matrix, $rows, $cols, $row-0, $col-0, $b & 0x01);
 	}
 
-	private function dmtx_place_b(&$matrix, $rows, $cols, $row, $col, $b) {
+	protected function dmtx_place_b(&$matrix, $rows, $cols, $row, $col, $b) {
 		if ($row < 0) {
 			$row += $rows;
 			$col += (4 - (($rows + 4) % 8));
@@ -3164,7 +3164,7 @@ class barcode_generator {
 	/*    number of rows per data region,                      */
 	/*    number of columns per data region                    */
 	/*  );                                                     */
-	private $dmtx_ec_params = array(
+	protected $dmtx_ec_params = array(
 		array(    3,  5, 1,   3, 0,   0, 1, 1,  8,  8 ),
 		array(    5,  7, 1,   5, 0,   0, 1, 1, 10, 10 ),
 		array(    8, 10, 1,   8, 0,   0, 1, 1, 12, 12 ),
@@ -3197,7 +3197,7 @@ class barcode_generator {
 		array(   49, 28, 1,  49, 0,   0, 1, 2, 14, 22 ),
 	);
 
-	private $dmtx_ec_polynomials = array(
+	protected $dmtx_ec_polynomials = array(
 		5 => array(
 			0, 235, 207, 210, 244, 15
 		),
@@ -3275,7 +3275,7 @@ class barcode_generator {
 		),
 	);
 
-	private $dmtx_log = array(
+	protected $dmtx_log = array(
 		  0,   0,   1, 240,   2, 225, 241,  53,
 		  3,  38, 226, 133, 242,  43,  54, 210,
 		  4, 195,  39, 114, 227, 106, 134,  28,
@@ -3310,7 +3310,7 @@ class barcode_generator {
 		237, 130, 111,  20,  93, 122, 177, 150,
 	);
 
-	private $dmtx_exp = array(
+	protected $dmtx_exp = array(
 		  1,   2,   4,   8,  16,  32,  64, 128,
 		 45,  90, 180,  69, 138,  57, 114, 228,
 		229, 231, 227, 235, 251, 219, 155,  27,
